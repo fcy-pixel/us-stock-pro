@@ -100,16 +100,16 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       return cors({
         symbol,
         name: profile.name ?? symbol,
-        price: q.c,
-        change: q.d,
-        changePercent: q.dp,
-        open: q.o,
-        high: q.h,
-        low: q.l,
-        prevClose: q.pc,
+        price: q.c ?? 0,
+        change: q.d ?? 0,
+        changePercent: q.dp ?? 0,
+        open: q.o ?? 0,
+        high: q.h ?? 0,
+        low: q.l ?? 0,
+        prevClose: q.pc ?? 0,
         volume: 0,
         avgVolume: 0,
-        marketCap: profile.marketCapitalization ? profile.marketCapitalization * 1_000_000 : 0,
+        marketCap: (profile.marketCapitalization ?? 0) * 1_000_000,
         pe: profile.peNormalizedAnnual ?? 0,
         eps: 0,
         week52High: q['52WeekHigh'] ?? 0,
@@ -131,13 +131,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           return {
             symbol: sym,
             name: p.name ?? sym,
-            price: q.c,
-            change: q.d,
-            changePercent: q.dp,
-            open: q.o,
-            high: q.h,
-            low: q.l,
-            prevClose: q.pc,
+            price: q.c ?? 0,
+            change: q.d ?? 0,
+            changePercent: q.dp ?? 0,
+            open: q.o ?? 0,
+            high: q.h ?? 0,
+            low: q.l ?? 0,
+            prevClose: q.pc ?? 0,
             volume: 0,
             avgVolume: 0,
             marketCap: (p.marketCapitalization ?? 0) * 1_000_000,
@@ -162,7 +162,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         results.map((r, i) => {
           const sym = INDEX_SYMBOLS[i]
           const q = r.status === 'fulfilled' ? (r.value as any) : { c: 0, d: 0, dp: 0 }
-          return { symbol: sym, name: INDEX_NAMES[sym], price: q.c, change: q.d, changePercent: q.dp }
+          return { symbol: sym, name: INDEX_NAMES[sym], price: q.c ?? 0, change: q.d ?? 0, changePercent: q.dp ?? 0 }
         })
       )
     }

@@ -73,7 +73,7 @@ export default function StocksPage() {
             { label: '成交量', value: formatVolume(quote.volume) },
             { label: '平均成交量', value: formatVolume(quote.avgVolume) },
             { label: '市値', value: formatMarketCap(quote.marketCap) },
-            { label: '市盈率 P/E', value: quote.pe > 0 ? quote.pe.toFixed(1) : 'N/A' },
+            { label: '市盈率 P/E', value: (quote.pe ?? 0) > 0 ? (quote.pe ?? 0).toFixed(1) : 'N/A' },
             { label: 'EPS 每股盈利', value: quote.eps > 0 ? formatPrice(quote.eps) : 'N/A' },
             { label: '52週最高', value: formatPrice(quote.week52High) },
             { label: '52週最低', value: formatPrice(quote.week52Low) },

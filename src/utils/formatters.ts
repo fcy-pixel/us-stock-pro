@@ -6,31 +6,36 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatPrice(price: number): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(price)
+  const n = price ?? 0
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)
 }
 
 export function formatChange(change: number): string {
-  const sign = change >= 0 ? '+' : ''
-  return `${sign}${change.toFixed(2)}`
+  const n = change ?? 0
+  const sign = n >= 0 ? '+' : ''
+  return `${sign}${n.toFixed(2)}`
 }
 
 export function formatPercent(pct: number): string {
-  const sign = pct >= 0 ? '+' : ''
-  return `${sign}${pct.toFixed(2)}%`
+  const n = pct ?? 0
+  const sign = n >= 0 ? '+' : ''
+  return `${sign}${n.toFixed(2)}%`
 }
 
 export function formatVolume(vol: number): string {
-  if (vol >= 1_000_000_000) return `${(vol / 1_000_000_000).toFixed(2)}B`
-  if (vol >= 1_000_000) return `${(vol / 1_000_000).toFixed(2)}M`
-  if (vol >= 1_000) return `${(vol / 1_000).toFixed(1)}K`
-  return String(vol)
+  const n = vol ?? 0
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(2)}B`
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`
+  return String(n)
 }
 
 export function formatMarketCap(mc: number): string {
-  if (mc >= 1_000_000_000_000) return `$${(mc / 1_000_000_000_000).toFixed(2)}T`
-  if (mc >= 1_000_000_000) return `$${(mc / 1_000_000_000).toFixed(2)}B`
-  if (mc >= 1_000_000) return `$${(mc / 1_000_000).toFixed(2)}M`
-  return `$${mc.toLocaleString()}`
+  const n = mc ?? 0
+  if (n >= 1_000_000_000_000) return `$${(n / 1_000_000_000_000).toFixed(2)}T`
+  if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2)}B`
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`
+  return `$${n.toLocaleString()}`
 }
 
 export function formatTimeAgo(timestamp: number): string {

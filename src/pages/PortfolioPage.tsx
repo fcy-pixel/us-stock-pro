@@ -92,7 +92,7 @@ export default function PortfolioPage() {
                   <span className="w-2.5 h-2.5 rounded-sm" style={{ background: d.color }} />
                   <span className="font-mono font-semibold text-white">{d.name}</span>
                 </div>
-                <span className="text-gray-400">{((d.value / totalValue) * 100).toFixed(1)}%</span>
+                <span className="text-gray-400">{(totalValue > 0 ? (d.value / totalValue) * 100 : 0).toFixed(1)}%</span>
               </div>
             ))}
           </div>

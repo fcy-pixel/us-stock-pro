@@ -77,7 +77,7 @@ export default function AIRecommendationCard({ rec }: { rec: Recommendation }) {
         <div className="ml-auto text-right">
           <div className="text-xs text-gray-500 mb-0.5">潛在升幅</div>
           <div className={`font-mono font-bold text-sm ${rec.upside >= 0 ? 'text-up' : 'text-down'}`}>
-            {rec.upside >= 0 ? '+' : ''}{rec.upside.toFixed(1)}%
+            {rec.upside >= 0 ? '+' : ''}{(rec.upside ?? 0).toFixed(1)}%
           </div>
         </div>
       </div>

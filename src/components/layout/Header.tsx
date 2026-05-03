@@ -56,7 +56,7 @@ export default function Header() {
         {DEMO_INDICES.slice(0, 4).map(idx => (
           <div key={idx.symbol} className="flex items-center gap-1.5 text-xs">
             <span className="text-gray-400">{idx.name}</span>
-            <span className="font-mono font-medium text-white">{idx.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            <span className="font-mono font-medium text-white">{(idx.price ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             <span className={idx.changePercent >= 0 ? 'text-up flex items-center gap-0.5' : 'text-down flex items-center gap-0.5'}>
               {idx.changePercent >= 0 ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
               {formatPercent(idx.changePercent)}

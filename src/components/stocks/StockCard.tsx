@@ -55,9 +55,9 @@ export default function StockCard({ quote }: { quote: Quote }) {
         />
       </div>
       <div className="flex justify-between text-[10px] text-gray-600 mt-1">
-        <span>${quote.week52Low.toFixed(0)}</span>
+        <span>${(quote.week52Low ?? 0).toFixed(0)}</span>
         <span className="text-gray-500">52週區間</span>
-        <span>${quote.week52High.toFixed(0)}</span>
+        <span>${(quote.week52High ?? 0).toFixed(0)}</span>
       </div>
     </div>
   )

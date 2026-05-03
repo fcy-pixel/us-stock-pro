@@ -39,7 +39,7 @@ export default function StockChart({ candles, symbol, currentPrice, change }: Pr
         <div className="text-gray-400">{format(new Date(d.time), 'yyyy年M月d日')}</div>
         <div className="font-mono font-bold text-white">{formatPrice(d.price)}</div>
         <div className={d.price >= firstPrice ? 'text-up' : 'text-down'}>
-          {d.price >= firstPrice ? '+' : ''}{((d.price - firstPrice) / firstPrice * 100).toFixed(2)}%
+          {d.price >= firstPrice ? '+' : ''}{(((d.price ?? 0) - firstPrice) / (firstPrice || 1) * 100).toFixed(2)}%
         </div>
       </div>
     )
@@ -51,7 +51,7 @@ export default function StockChart({ candles, symbol, currentPrice, change }: Pr
         <div>
           <span className="font-mono font-bold text-2xl text-white">{formatPrice(currentPrice)}</span>
           <span className={`ml-3 text-sm font-mono ${up ? 'text-up' : 'text-down'}`}>
-            {up ? '+' : ''}{change.toFixed(2)}%
+            {up ? '+' : ''}{(change ?? 0).toFixed(2)}%
           </span>
         </div>
         <div className="flex gap-1">
@@ -85,7 +85,7 @@ export default function StockChart({ candles, symbol, currentPrice, change }: Pr
           />
           <YAxis
             domain={[minPrice, maxPrice]}
-            tickFormatter={v => `$${v.toFixed(0)}`}
+            tickFormatter={v => `$${(v ?? 0).toFixed(0)}`}
             tick={{ fill: '#6b7280', fontSize: 10 }}
             axisLine={false}
             tickLine={false}

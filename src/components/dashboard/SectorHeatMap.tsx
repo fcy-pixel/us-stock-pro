@@ -28,7 +28,7 @@ export default function SectorHeatMap({ sectors }: { sectors: SectorPerformance[
               >
                 <span className="text-[10px] text-gray-300 font-medium leading-tight">{s.sector}</span>
                 <span className={`font-mono font-bold text-sm ${up ? 'text-up' : 'text-down'}`}>
-                  {up ? '+' : ''}{s.changePercent.toFixed(2)}%
+                  {up ? '+' : ''}{(s.changePercent ?? 0).toFixed(2)}%
                 </span>
                 <span className="text-[10px] text-gray-500">{s.topStock}</span>
               </div>
