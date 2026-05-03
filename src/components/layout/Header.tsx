@@ -73,14 +73,14 @@ export default function Header() {
             ref={inputRef}
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Search stocks…"
+            placeholder="搜尋股票代碼…"
             className="bg-transparent text-sm text-white placeholder-gray-500 outline-none w-full"
           />
           {query && <button onClick={() => setQuery('')}><X size={12} className="text-gray-500" /></button>}
         </div>
         {(results.length > 0 || searching) && (
           <div className="absolute top-full mt-1 right-0 w-72 bg-bg-card border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
-            {searching && <div className="px-4 py-3 text-xs text-gray-400">Searching…</div>}
+            {searching && <div className="px-4 py-3 text-xs text-gray-400">搜尋中…</div>}
             {results.map(r => (
               <button
                 key={r.symbol}

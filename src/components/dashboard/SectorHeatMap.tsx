@@ -6,7 +6,7 @@ export default function SectorHeatMap({ sectors }: { sectors: SectorPerformance[
 
   return (
     <section>
-      <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Sector Performance</h2>
+      <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">板塊表現</h2>
       <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
         {sectors
           .sort((a, b) => b.changePercent - a.changePercent)

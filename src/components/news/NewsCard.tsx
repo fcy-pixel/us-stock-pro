@@ -7,9 +7,9 @@ export default function NewsCard({ item, compact = false }: { item: NewsItem; co
   const navigate = useNavigate()
 
   const sentimentConfig = {
-    positive: { color: 'text-up', bg: 'bg-up/10 border-up/20', icon: TrendingUp, label: 'Bullish' },
-    negative: { color: 'text-down', bg: 'bg-down/10 border-down/20', icon: TrendingDown, label: 'Bearish' },
-    neutral: { color: 'text-gray-400', bg: 'bg-white/5 border-white/10', icon: Minus, label: 'Neutral' },
+    positive: { color: 'text-up', bg: 'bg-up/10 border-up/20', icon: TrendingUp, label: '看漲' },
+    negative: { color: 'text-down', bg: 'bg-down/10 border-down/20', icon: TrendingDown, label: '看跌' },
+    neutral: { color: 'text-gray-400', bg: 'bg-white/5 border-white/10', icon: Minus, label: '中性' },
   }
   const cfg = sentimentConfig[item.sentiment]
   const Icon = cfg.icon

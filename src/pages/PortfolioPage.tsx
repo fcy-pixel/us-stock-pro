@@ -46,24 +46,24 @@ export default function PortfolioPage() {
     <div className="space-y-6 animate-slide-up">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Portfolio</h1>
-          <p className="text-sm text-gray-400 mt-0.5">Track your US stock holdings & performance</p>
+          <h1 className="text-2xl font-bold text-white">投資組合</h1>
+          <p className="text-sm text-gray-400 mt-0.5">追蹤美股持股與總體表現</p>
         </div>
         <button
           onClick={() => setShowAdd(true)}
           className="flex items-center gap-2 px-4 py-2 bg-accent-blue hover:bg-accent-blue/80 text-white rounded-lg text-sm transition-all"
         >
-          <Plus size={14} /> Add Holding
+          <Plus size={14} /> 新增持股
         </button>
       </div>
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: 'Total Value', value: formatMarketCap(totalValue).replace('B', '').replace('M', ''), sub: formatPrice(totalValue), color: 'text-white' },
-          { label: 'Total Gain/Loss', value: formatPrice(Math.abs(totalGain)), sub: formatPercent(totalGainPct), color: totalGain >= 0 ? 'text-up' : 'text-down' },
-          { label: "Today's P&L", value: formatPrice(Math.abs(dayChange)), sub: dayChange >= 0 ? '+today' : '-today', color: dayChange >= 0 ? 'text-up' : 'text-down' },
-          { label: 'Holdings', value: String(portfolio.length), sub: 'positions', color: 'text-accent-blue' },
+          { label: '總市值', value: formatMarketCap(totalValue).replace('B', '').replace('M', ''), sub: formatPrice(totalValue), color: 'text-white' },
+          { label: '總損益', value: formatPrice(Math.abs(totalGain)), sub: formatPercent(totalGainPct), color: totalGain >= 0 ? 'text-up' : 'text-down' },
+          { label: '今日損益', value: formatPrice(Math.abs(dayChange)), sub: dayChange >= 0 ? '+今日' : '-今日', color: dayChange >= 0 ? 'text-up' : 'text-down' },
+          { label: '持股數', value: String(portfolio.length), sub: '個投資位置', color: 'text-accent-blue' },
         ].map(({ label, value, sub, color }) => (
           <div key={label} className="bg-bg-card border border-white/5 rounded-xl p-4">
             <div className="text-xs text-gray-500 mb-2">{label}</div>
@@ -76,7 +76,7 @@ export default function PortfolioPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Allocation pie */}
         <div className="bg-bg-card border border-white/5 rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-white mb-4">Allocation</h3>
+          <h3 className="text-sm font-semibold text-white mb-4">配置分析</h3>
           <ResponsiveContainer width="100%" height={180}>
             <PieChart>
               <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" strokeWidth={0}>
@@ -101,7 +101,7 @@ export default function PortfolioPage() {
         {/* Holdings table */}
         <div className="lg:col-span-2 bg-bg-card border border-white/5 rounded-xl overflow-hidden">
           <div className="px-5 py-3 border-b border-white/5 text-xs text-gray-500 font-medium uppercase tracking-wider grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4">
-            <span>Stock</span><span>Price</span><span>P&L</span><span className="hidden sm:block">Value</span><span></span>
+            <span>股票</span><span>價格</span><span>損益</span><span className="hidden sm:block">市值</span><span></span>
           </div>
           {portfolio.map(h => (
             <div
@@ -115,13 +115,13 @@ export default function PortfolioPage() {
                 </div>
                 <div>
                   <div className="font-semibold text-sm text-white">{h.symbol}</div>
-                  <div className="text-xs text-gray-500">{h.shares} shares @ {formatPrice(h.avgCost)}</div>
+                  <div className="text-xs text-gray-500">{h.shares} 股 @ {formatPrice(h.avgCost)}</div>
                 </div>
               </div>
               <div>
                 <div className="font-mono text-sm text-white">{formatPrice(h.currentPrice)}</div>
                 <div className={`text-xs font-mono ${h.dayChangePercent >= 0 ? 'text-up' : 'text-down'}`}>
-                  {formatPercent(h.dayChangePercent)} today
+                  {formatPercent(h.dayChangePercent)} 今日
                 </div>
               </div>
               <div>
@@ -147,14 +147,14 @@ export default function PortfolioPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-bg-secondary border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-white">Add Holding</h3>
+              <h3 className="font-semibold text-white">新增持股</h3>
               <button onClick={() => setShowAdd(false)} className="text-gray-400 hover:text-white"><X size={18} /></button>
             </div>
             <div className="space-y-4">
               {[
-                { label: 'Symbol', key: 'symbol', placeholder: 'e.g. AAPL' },
-                { label: 'Shares', key: 'shares', placeholder: 'e.g. 10' },
-                { label: 'Avg Cost (USD)', key: 'avgCost', placeholder: 'e.g. 185.50' },
+                { label: '股票代碼', key: 'symbol', placeholder: '例如 AAPL' },
+                { label: '股數', key: 'shares', placeholder: '例如 10' },
+                { label: '平均成本 (USD)', key: 'avgCost', placeholder: '例如 185.50' },
               ].map(({ label, key, placeholder }) => (
                 <div key={key}>
                   <label className="text-xs text-gray-400 mb-1 block">{label}</label>
@@ -171,7 +171,7 @@ export default function PortfolioPage() {
                 disabled={!form.symbol || !form.shares || !form.avgCost}
                 className="w-full py-2.5 bg-accent-blue hover:bg-accent-blue/80 disabled:opacity-40 text-white rounded-lg text-sm font-medium transition-all"
               >
-                Add to Portfolio
+                加入投資組合
               </button>
             </div>
           </div>

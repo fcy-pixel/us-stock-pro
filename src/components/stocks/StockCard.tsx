@@ -43,8 +43,8 @@ export default function StockCard({ quote }: { quote: Quote }) {
           </div>
         </div>
         <div className="text-right text-xs text-gray-500 space-y-0.5">
-          <div>Vol: {formatVolume(quote.volume)}</div>
-          <div>Cap: {formatMarketCap(quote.marketCap)}</div>
+          <div>成交量: {formatVolume(quote.volume)}</div>
+          <div>市値: {formatMarketCap(quote.marketCap)}</div>
         </div>
       </div>
 
@@ -56,7 +56,7 @@ export default function StockCard({ quote }: { quote: Quote }) {
       </div>
       <div className="flex justify-between text-[10px] text-gray-600 mt-1">
         <span>${quote.week52Low.toFixed(0)}</span>
-        <span className="text-gray-500">52W Range</span>
+        <span className="text-gray-500">52週區間</span>
         <span>${quote.week52High.toFixed(0)}</span>
       </div>
     </div>

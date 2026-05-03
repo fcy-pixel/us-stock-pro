@@ -60,17 +60,17 @@ function riskFromVolatility(quote: Quote): Recommendation['risk'] {
 
 function buildReasons(scores: Recommendation['scores'], quote: Quote, news: NewsItem[]): string[] {
   const reasons: string[] = []
-  if (scores.sentiment > 70) reasons.push(`Positive news sentiment (${scores.sentiment}%)`)
-  if (scores.sentiment < 35) reasons.push(`Negative news flow — ${news.filter(n => n.relatedStocks?.includes(quote.symbol) && n.sentiment === 'negative').length} negative articles`)
-  if (scores.technical > 65) reasons.push('Technically oversold — potential mean reversion')
-  if (scores.technical < 35) reasons.push('Near 52-week high — limited upside technically')
-  if (scores.momentum > 65) reasons.push(`Strong price momentum: ${quote.changePercent > 0 ? '+' : ''}${quote.changePercent.toFixed(2)}% today`)
-  if (scores.momentum < 35) reasons.push(`Weak momentum: ${quote.changePercent.toFixed(2)}% today`)
-  if (scores.analyst > 65) reasons.push('Majority analyst consensus: BUY')
-  if (scores.analyst < 35) reasons.push('Analyst consensus skews bearish')
-  if (quote.pe > 0 && quote.pe < 20) reasons.push(`Attractive valuation: P/E ${quote.pe.toFixed(1)}x`)
-  if (quote.pe > 60) reasons.push(`Rich valuation: P/E ${quote.pe.toFixed(1)}x — growth must justify premium`)
-  return reasons.length ? reasons : ['Insufficient data for strong signal — neutral stance']
+  if (scores.sentiment > 70) reasons.push(`新聞情緒偏正面 (${scores.sentiment}%)`)
+  if (scores.sentiment < 35) reasons.push(`負面新聞主導 — ${news.filter(n => n.relatedStocks?.includes(quote.symbol) && n.sentiment === 'negative').length} 篇負面報道`)
+  if (scores.technical > 65) reasons.push('技術面超賣 — 存在均值回歸機會')
+  if (scores.technical < 35) reasons.push('接近52週高位 — 技術上行空間有限')
+  if (scores.momentum > 65) reasons.push(`強勁價格動量：今日 ${quote.changePercent > 0 ? '+' : ''}${quote.changePercent.toFixed(2)}%`)
+  if (scores.momentum < 35) reasons.push(`動量偏弱：今日 ${quote.changePercent.toFixed(2)}%`)
+  if (scores.analyst > 65) reasons.push('多數分析師共識：買入')
+  if (scores.analyst < 35) reasons.push('分析師共識偏向看淡')
+  if (quote.pe > 0 && quote.pe < 20) reasons.push(`估值吸引：市盈率 ${quote.pe.toFixed(1)}x`)
+  if (quote.pe > 60) reasons.push(`估值偏高：市盈率 ${quote.pe.toFixed(1)}x — 需高增長支撐`)
+  return reasons.length ? reasons : ['訊號不足，暫維持中性觀望']
 }
 
 export function generateRecommendations(quotes: Quote[], news: NewsItem[]): Recommendation[] {

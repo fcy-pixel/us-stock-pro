@@ -32,31 +32,31 @@ export default function AIPicksPage() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-            <Cpu size={24} className="text-accent-blue" /> AI Stock Picks
+            <Cpu size={24} className="text-accent-blue" /> AI 選股推薦
           </h1>
           <p className="text-sm text-gray-400 mt-1">
-            Multi-factor AI scoring: sentiment analysis × technical indicators × price momentum × analyst consensus
+            多因子 AI 評分：情緒分析 × 技術指標 × 價格動量 × 分析師共識
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
           <RefreshCw size={12} />
-          <span>Updated every 2 minutes</span>
+          <span>每 2 分鐘更新</span>
         </div>
       </div>
 
       {/* Disclaimer */}
       <div className="flex items-start gap-3 bg-yellow-400/5 border border-yellow-400/20 rounded-xl p-4 text-xs text-yellow-300/70">
         <Info size={14} className="shrink-0 mt-0.5 text-yellow-400/60" />
-        <p>AI recommendations are for informational purposes only and do not constitute financial advice. Always conduct your own research and consult a licensed financial advisor before making investment decisions.</p>
+        <p>AI 推薦僅供參考，不構成任何投資建議。投資有風險，市場有漲有跌。請自行研究分析，如需請誵詢持牌財務顧問。</p>
       </div>
 
       {/* How it works */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: 'Sentiment Score', desc: 'News & social media sentiment analysis', value: '30%', color: 'text-accent-blue' },
-          { label: 'Technical Score', desc: '52W position, RSI proxy, MA signals', value: '25%', color: 'text-purple-400' },
-          { label: 'Momentum Score', desc: 'Price momentum & volume analysis', value: '25%', color: 'text-yellow-400' },
-          { label: 'Analyst Score', desc: 'Wall Street analyst consensus ratings', value: '20%', color: 'text-up' },
+          { label: '情緒評分', desc: '新聞與社群媒體情緒分析', value: '30%', color: 'text-accent-blue' },
+          { label: '技術評分', desc: '52週位置、RSI指標、均線訊號', value: '25%', color: 'text-purple-400' },
+          { label: '動量評分', desc: '價格動量與成交量分析', value: '25%', color: 'text-yellow-400' },
+          { label: '分析師評分', desc: '华尔街分析師共識評级', value: '20%', color: 'text-up' },
         ].map(({ label, desc, value, color }) => (
           <div key={label} className="bg-bg-card border border-white/5 rounded-xl p-4">
             <div className={`text-lg font-bold ${color} mb-1`}>{value}</div>
@@ -71,7 +71,7 @@ export default function AIPicksPage() {
         <section>
           <h2 className="text-xs font-semibold text-up uppercase tracking-widest mb-4 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-up animate-pulse" />
-            Buy Signals ({buyRecs.length})
+            買入訊號 ({buyRecs.length})
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {buyRecs.map(r => <AIRecommendationCard key={r.symbol} rec={r} />)}
@@ -83,7 +83,7 @@ export default function AIPicksPage() {
       {holdRecs.length > 0 && (
         <section>
           <h2 className="text-xs font-semibold text-yellow-400 uppercase tracking-widest mb-4">
-            Hold / Neutral ({holdRecs.length})
+            持有 / 中性 ({holdRecs.length})
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {holdRecs.map(r => <AIRecommendationCard key={r.symbol} rec={r} />)}
@@ -95,7 +95,7 @@ export default function AIPicksPage() {
       {sellRecs.length > 0 && (
         <section>
           <h2 className="text-xs font-semibold text-down uppercase tracking-widest mb-4">
-            Sell Signals ({sellRecs.length})
+            賣出訊號 ({sellRecs.length})
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {sellRecs.map(r => <AIRecommendationCard key={r.symbol} rec={r} />)}

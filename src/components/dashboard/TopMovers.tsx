@@ -37,7 +37,7 @@ export default function TopMovers({ quotes }: { quotes: Quote[] }) {
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div className="bg-bg-card border border-white/5 rounded-xl p-4">
         <h3 className="text-xs font-semibold text-up uppercase tracking-widest mb-3 flex items-center gap-2">
-          <TrendingUp size={13} /> Top Gainers
+          <TrendingUp size={13} /> 升幅最大
         </h3>
         <div className="space-y-0.5">
           {gainers.map(q => <Row key={q.symbol} q={q} />)}
@@ -45,7 +45,7 @@ export default function TopMovers({ quotes }: { quotes: Quote[] }) {
       </div>
       <div className="bg-bg-card border border-white/5 rounded-xl p-4">
         <h3 className="text-xs font-semibold text-down uppercase tracking-widest mb-3 flex items-center gap-2">
-          <TrendingDown size={13} /> Top Losers
+          <TrendingDown size={13} /> 跌幅最大
         </h3>
         <div className="space-y-0.5">
           {losers.map(q => <Row key={q.symbol} q={q} />)}

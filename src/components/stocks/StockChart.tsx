@@ -36,7 +36,7 @@ export default function StockChart({ candles, symbol, currentPrice, change }: Pr
     const d = payload[0].payload
     return (
       <div className="bg-bg-card border border-white/10 rounded-lg px-3 py-2 text-xs shadow-xl">
-        <div className="text-gray-400">{format(new Date(d.time), 'MMM d, yyyy')}</div>
+        <div className="text-gray-400">{format(new Date(d.time), 'yyyy年M月d日')}</div>
         <div className="font-mono font-bold text-white">{formatPrice(d.price)}</div>
         <div className={d.price >= firstPrice ? 'text-up' : 'text-down'}>
           {d.price >= firstPrice ? '+' : ''}{((d.price - firstPrice) / firstPrice * 100).toFixed(2)}%

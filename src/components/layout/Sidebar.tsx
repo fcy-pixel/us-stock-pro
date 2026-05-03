@@ -7,12 +7,12 @@ import { useAppStore } from '../../store'
 import { cn } from '../../utils/formatters'
 
 const NAV = [
-  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/news', label: 'News & Signals', icon: Newspaper },
-  { path: '/stocks', label: 'Stock Screener', icon: TrendingUp },
-  { path: '/watchlist', label: 'Watchlist', icon: Star },
-  { path: '/portfolio', label: 'Portfolio', icon: Briefcase },
-  { path: '/ai-picks', label: 'AI Picks', icon: Cpu },
+  { path: '/', label: '市場總覽', icon: LayoutDashboard },
+  { path: '/news', label: '新聞與訊號', icon: Newspaper },
+  { path: '/stocks', label: '股票篩選器', icon: TrendingUp },
+  { path: '/watchlist', label: '自選股', icon: Star },
+  { path: '/portfolio', label: '投資組合', icon: Briefcase },
+  { path: '/ai-picks', label: 'AI 選股', icon: Cpu },
 ]
 
 export default function Sidebar() {
@@ -37,7 +37,7 @@ export default function Sidebar() {
             <Activity size={18} className="text-accent-blue" />
           </div>
           {sidebarOpen && (
-            <span className="font-bold text-white tracking-tight whitespace-nowrap">StockPro</span>
+            <span className="font-bold text-white tracking-tight whitespace-nowrap">股票Pro</span>
           )}
         </div>
 

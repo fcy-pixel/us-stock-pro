@@ -24,31 +24,31 @@ export default function WatchlistPage() {
     <div className="space-y-6 animate-slide-up">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Watchlist</h1>
-          <p className="text-sm text-gray-400 mt-0.5">{watchlist.length} stocks tracked</p>
+          <h1 className="text-2xl font-bold text-white">自選股</h1>
+          <p className="text-sm text-gray-400 mt-0.5">已追蹤 {watchlist.length} 支股票</p>
         </div>
         <div className="text-xs text-gray-500 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-up animate-pulse" />
-          Live prices
+          直播價格
         </div>
       </div>
 
       {watchlist.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 text-gray-500 space-y-3">
           <Star size={40} className="opacity-30" />
-          <p>Your watchlist is empty</p>
+          <p>自選股列表為空</p>
           <button onClick={() => navigate('/stocks')} className="text-accent-blue text-sm hover:underline">
-            Browse stocks →
+            瀏覽股票 →
           </button>
         </div>
       ) : (
         <div className="bg-bg-card border border-white/5 rounded-xl overflow-hidden">
           <div className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 border-b border-white/5 text-xs text-gray-500 font-medium uppercase tracking-wider">
-            <span>Symbol</span>
-            <span>Price</span>
-            <span>Change</span>
-            <span className="hidden sm:block">Volume</span>
-            <span>Actions</span>
+            <span>股票代碼</span>
+            <span>價格</span>
+            <span>漲跌</span>
+            <span className="hidden sm:block">成交量</span>
+            <span>操作</span>
           </div>
           {stockData.map(q => (
             <div

@@ -47,12 +47,12 @@ export default function DashboardPage() {
       {/* Page title */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Market Dashboard</h1>
-          <p className="text-sm text-gray-400 mt-0.5">Real-time US market intelligence & AI insights</p>
+          <h1 className="text-2xl font-bold text-white">市場總覽</h1>
+          <p className="text-sm text-gray-400 mt-0.5">美股实時行情·新聞情緒分析·AI 智能選股</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-500">
           <RefreshCw size={12} className="animate-spin-slow" />
-          <span>Live • Updates every 30s</span>
+          <span>直播 · 每 30 秒更新</span>
         </div>
       </div>
 
@@ -64,7 +64,7 @@ export default function DashboardPage() {
 
       {/* Top movers */}
       <section>
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Today's Top Movers</h2>
+        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">今日漲跌最大</h2>
         <TopMovers quotes={stockData} />
       </section>
 
@@ -73,9 +73,9 @@ export default function DashboardPage() {
         <section>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-              <Cpu size={13} className="text-accent-blue" /> AI Top Picks Today
+              <Cpu size={13} className="text-accent-blue" /> AI 今日最佳選股
             </h2>
-            <a href="/ai-picks" className="text-xs text-accent-blue hover:underline">View all →</a>
+            <a href="/ai-picks" className="text-xs text-accent-blue hover:underline">查看全部 →</a>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {picks.map(r => <AIRecommendationCard key={r.symbol} rec={r} />)}
@@ -87,9 +87,9 @@ export default function DashboardPage() {
       <section>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-            <Newspaper size={13} /> Latest Market News
+            <Newspaper size={13} /> 最新市場新聞
           </h2>
-          <a href="/news" className="text-xs text-accent-blue hover:underline">View all →</a>
+          <a href="/news" className="text-xs text-accent-blue hover:underline">查看全部 →</a>
         </div>
         {loadingNews ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
