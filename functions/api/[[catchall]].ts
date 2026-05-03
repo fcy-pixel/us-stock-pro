@@ -221,6 +221,68 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       return cors(parsed)
     }
 
+    // ── AI Market Summary ─────────────────────────────────────────────
+    if (path === '/ai-summary') {
+      if (!env.QWEN_API_KEY) return cors({ error: 'QWEN_API_KEY not configured' }, 503)
+
+      // Fetch news from multiple categories concurrently
+      const categories = ['general', 'macro', 'earnings']
+      const newsResults = await Promise.allSettled(
+        categories.map(cat => api(`/news?category=${cat}`))
+      )
+      const allNews: any[] = []
+      for (const r of newsResults) {
+        if (r.status === 'fulfilled' && Array.isArray(r.value)) {
+          allNews.push(...r.value.slice(0, 8))
+        }
+      }
+      // Deduplicate by id
+      const seen = new Set<string>()
+      const unique = allNews.filter((n: any) => {
+        const id = String(n.id)
+        if (seen.has(id)) return false
+        seen.add(id)
+        return true
+      }).slice(0, 25)
+
+      if (unique.length === 0) return cors({ error: 'No news available' }, 503)
+
+      const headlines = unique.map((n: any, i: number) => `${i + 1}. ${n.headline}${n.summary ? ' — ' + n.summary.slice(0, 120) : ''}`).join('\n')
+
+      const result = await qwen([
+        {
+          role: 'system',
+          content: `你是專業美股市場分析師。根據提供的財經新聞，用繁體中文輸出一份市場摘要。
+只輸出 JSON，格式如下：
+{
+  "digest": "3至4句的整體市場概述，涵蓋主要趨勢、重大消息及市場情緒。",
+  "keyPoints": ["重點一","重點二","重點三","重點四","重點五"],
+  "overallSentiment": "bullish|bearish|neutral",
+  "hotTopics": ["主題一","主題二","主題三","主題四"]
+}
+要求：
+- digest 和 keyPoints 必須用繁體中文
+- hotTopics 可包含公司名、板塊或主題（繁體中文）
+- overallSentiment 只可為 bullish、bearish 或 neutral
+- 不要加入原文沒有的資訊`,
+        },
+        {
+          role: 'user',
+          content: `請根據以下 ${unique.length} 條財經新聞，生成市場摘要：\n\n${headlines}`,
+        },
+      ], env.QWEN_API_KEY)
+
+      const content = result?.choices?.[0]?.message?.content ?? '{}'
+      const parsed = parseJsonContent(content)
+      return cors({
+        digest: typeof parsed.digest === 'string' ? parsed.digest : '',
+        keyPoints: Array.isArray(parsed.keyPoints) ? parsed.keyPoints.filter((p: unknown) => typeof p === 'string') : [],
+        overallSentiment: ['bullish', 'bearish', 'neutral'].includes(parsed.overallSentiment) ? parsed.overallSentiment : 'neutral',
+        hotTopics: Array.isArray(parsed.hotTopics) ? parsed.hotTopics.filter((t: unknown) => typeof t === 'string') : [],
+        updatedAt: Math.floor(Date.now() / 1000),
+      })
+    }
+
     // ── News ──────────────────────────────────────────────────────────
     if (path === '/news') {
       const category = sp.get('category') ?? 'general'

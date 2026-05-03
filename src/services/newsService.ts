@@ -1,4 +1,4 @@
-import type { NewsItem } from '../types'
+import type { NewsItem, AISummary } from '../types'
 import { DEMO_NEWS } from '../utils/demoData'
 import { analyzeSentiment } from '../utils/sentiment'
 import { findRelatedStocks } from '../utils/stockKeywords'
@@ -35,4 +35,14 @@ export async function getCompanyNews(symbol: string): Promise<NewsItem[]> {
   const from = new Date(Date.now() - 7 * 86400_000).toISOString().split('T')[0]
   const to = new Date().toISOString().split('T')[0]
   return apiFetch<NewsItem[]>(`/company-news?symbol=${encodeURIComponent(symbol)}&from=${from}&to=${to}&translate=zh-Hant`, [])
+}
+
+export async function getAISummary(): Promise<AISummary | null> {
+  try {
+    const res = await fetch(`${BASE}/ai-summary`)
+    if (!res.ok) return null
+    return await res.json() as AISummary
+  } catch {
+    return null
+  }
 }

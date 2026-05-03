@@ -1,10 +1,8 @@
 import { ExternalLink, TrendingUp, TrendingDown, Minus, Clock } from 'lucide-react'
 import type { NewsItem } from '../../types'
 import { formatTimeAgo } from '../../utils/formatters'
-import { useNavigate } from 'react-router-dom'
 
 export default function NewsCard({ item, compact = false }: { item: NewsItem; compact?: boolean }) {
-  const navigate = useNavigate()
   const headline = item.headlineZh || item.headline
   const summary = item.summaryZh || item.summary
 
@@ -51,13 +49,12 @@ export default function NewsCard({ item, compact = false }: { item: NewsItem; co
         <div className="flex items-center justify-between">
           <div className="flex flex-wrap gap-1">
             {item.relatedStocks?.slice(0, 4).map(sym => (
-              <button
+              <span
                 key={sym}
-                onClick={() => navigate(`/stocks/${sym}`)}
-                className="text-[10px] font-mono font-semibold text-accent-blue bg-accent-blue/10 hover:bg-accent-blue/20 px-1.5 py-0.5 rounded transition-colors"
+                className="text-[10px] font-mono font-semibold text-accent-blue bg-accent-blue/10 px-1.5 py-0.5 rounded"
               >
                 {sym}
-              </button>
+              </span>
             ))}
           </div>
           <div className="flex items-center gap-2 text-xs text-gray-500">

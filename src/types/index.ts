@@ -49,6 +49,14 @@ export interface NewsItem {
   category: string
 }
 
+export interface AISummary {
+  digest: string           // AI-generated comprehensive market digest in Traditional Chinese
+  keyPoints: string[]      // 5 key bullet points
+  overallSentiment: 'bullish' | 'bearish' | 'neutral'
+  hotTopics: string[]      // hot themes/sectors mentioned
+  updatedAt: number        // Unix timestamp seconds
+}
+
 export interface MarketIndex {
   symbol: string
   name: string
