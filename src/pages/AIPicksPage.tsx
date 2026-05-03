@@ -4,7 +4,7 @@ import AIRecommendationCard from '../components/ai/AIRecommendationCard'
 import { PageLoader } from '../components/common/Loading'
 import { getQuotes } from '../services/stockService'
 import { getMarketNews } from '../services/newsService'
-import { getAIRecommendations } from '../services/aiService'
+import { generateRecommendations, getAIRecommendations } from '../services/aiService'
 import { DEMO_QUOTES, DEMO_NEWS } from '../utils/demoData'
 
 export default function AIPicksPage() {
@@ -29,12 +29,13 @@ export default function AIPicksPage() {
     refetchInterval: 120_000,
   })
 
-  const allRecs = aiRecs ?? []
+  const fallbackRecs = generateRecommendations(quoteData, newsData)
+  const allRecs = aiRecs?.length ? aiRecs : fallbackRecs
   const buyRecs = allRecs.filter(r => r.action === 'STRONG_BUY' || r.action === 'BUY')
   const holdRecs = allRecs.filter(r => r.action === 'HOLD')
   const sellRecs = allRecs.filter(r => r.action === 'SELL' || r.action === 'STRONG_SELL')
 
-  if (isLoading || loadingAI) return <PageLoader />
+  if (isLoading) return <PageLoader />
 
   return (
     <div className="space-y-8 animate-slide-up">
@@ -48,8 +49,8 @@ export default function AIPicksPage() {
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-          <RefreshCw size={12} />
-          <span>每 2 分鐘更新</span>
+          <RefreshCw size={12} className={loadingAI ? 'animate-spin' : undefined} />
+          <span>{loadingAI ? 'Qwen AI 分析中' : '每 2 分鐘更新'}</span>
         </div>
       </div>
 
