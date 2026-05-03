@@ -36,7 +36,9 @@ export interface Candle {
 export interface NewsItem {
   id: string
   headline: string
+  headlineZh?: string
   summary: string
+  summaryZh?: string
   url: string
   datetime: number   // Unix timestamp seconds
   source: string

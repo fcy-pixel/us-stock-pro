@@ -37,6 +37,56 @@ async function qwen(messages: unknown[], apiKey: string) {
   return res.json()
 }
 
+function parseJsonContent(content: string) {
+  const cleaned = content
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/```$/i, '')
+    .trim()
+  return JSON.parse(cleaned)
+}
+
+async function translateNews(news: any[], apiKey?: string) {
+  if (!apiKey || news.length === 0) return news
+
+  try {
+    const items = news.slice(0, 20).map((item: any) => ({
+      id: item.id,
+      headline: item.headline,
+      summary: item.summary,
+    }))
+    const result = await qwen([
+      {
+        role: 'system',
+        content: '你是財經新聞翻譯員。只輸出 JSON。把英文財經新聞 headline 和 summary 翻譯成自然、專業的繁體中文。保留股票代碼、公司名、產品名、機構名與來源名的英文；不要加入原文沒有的內容。JSON 格式：{"items":[{"id":"...","headlineZh":"...","summaryZh":"..."}]}',
+      },
+      {
+        role: 'user',
+        content: `翻譯以下新聞：${JSON.stringify({ items })}`,
+      },
+    ], apiKey)
+    const content = result?.choices?.[0]?.message?.content ?? '{}'
+    const parsed = parseJsonContent(content)
+    const translated = new Map(
+      (Array.isArray(parsed.items) ? parsed.items : [])
+        .filter((item: any) => item?.id)
+        .map((item: any) => [String(item.id), item])
+    )
+
+    return news.map((item: any) => {
+      const zh = translated.get(String(item.id)) as any
+      if (!zh) return item
+      return {
+        ...item,
+        headlineZh: typeof zh.headlineZh === 'string' && zh.headlineZh.trim() ? zh.headlineZh : item.headline,
+        summaryZh: typeof zh.summaryZh === 'string' && zh.summaryZh.trim() ? zh.summaryZh : item.summary,
+      }
+    })
+  } catch {
+    return news
+  }
+}
+
 const num = (value: unknown, fallback = 0) => {
   const n = typeof value === 'number' ? value : Number(value)
   return Number.isFinite(n) ? n : fallback
@@ -174,6 +224,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     // ── News ──────────────────────────────────────────────────────────
     if (path === '/news') {
       const category = sp.get('category') ?? 'general'
+      const shouldTranslate = sp.get('translate') !== '0'
       const raw: any[] = await api(`/news?category=${category}`)
       const news = raw.slice(0, 20).map((n: any) => ({
         id: String(n.id),
@@ -188,7 +239,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         sentimentScore: 0,
         relatedStocks: [],
       }))
-      return cors(news)
+      return cors(shouldTranslate ? await translateNews(news, env.QWEN_API_KEY) : news)
     }
 
     // ── Company news ──────────────────────────────────────────────────
@@ -197,8 +248,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       const from = sp.get('from')
       const to = sp.get('to')
       if (!symbol || !from || !to) return cors({ error: 'Missing params' }, 400)
+      const shouldTranslate = sp.get('translate') !== '0'
       const raw: any[] = await api(`/company-news?symbol=${symbol}&from=${from}&to=${to}`)
-      return cors(raw.slice(0, 15).map((n: any) => ({
+      const news = raw.slice(0, 15).map((n: any) => ({
         id: String(n.id),
         headline: n.headline,
         summary: n.summary,
@@ -210,7 +262,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         sentiment: 'neutral',
         sentimentScore: 0,
         relatedStocks: [symbol],
-      })))
+      }))
+      return cors(shouldTranslate ? await translateNews(news, env.QWEN_API_KEY) : news)
     }
 
     // ── Single quote ──────────────────────────────────────────────────

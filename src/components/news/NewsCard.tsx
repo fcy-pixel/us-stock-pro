@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom'
 
 export default function NewsCard({ item, compact = false }: { item: NewsItem; compact?: boolean }) {
   const navigate = useNavigate()
+  const headline = item.headlineZh || item.headline
+  const summary = item.summaryZh || item.summary
 
   const sentimentConfig = {
     positive: { color: 'text-up', bg: 'bg-up/10 border-up/20', icon: TrendingUp, label: '看漲' },
@@ -38,11 +40,11 @@ export default function NewsCard({ item, compact = false }: { item: NewsItem; co
         {/* Headline */}
         <a href={item.url} target="_blank" rel="noopener noreferrer"
           className="block font-semibold text-white text-sm leading-snug hover:text-accent-blue transition-colors mb-1.5 line-clamp-3">
-          {item.headline}
+          {headline}
         </a>
 
         {!compact && (
-          <p className="text-xs text-gray-400 leading-relaxed line-clamp-2 mb-3">{item.summary}</p>
+          <p className="text-xs text-gray-400 leading-relaxed line-clamp-2 mb-3">{summary}</p>
         )}
 
         {/* Footer */}

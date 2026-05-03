@@ -16,7 +16,7 @@ async function apiFetch<T>(path: string, fallback: T): Promise<T> {
 }
 
 export async function getMarketNews(category = 'general'): Promise<NewsItem[]> {
-  const raw = await apiFetch<NewsItem[]>(`/news?category=${category}`, DEMO_NEWS)
+  const raw = await apiFetch<NewsItem[]>(`/news?category=${category}&translate=zh-Hant`, DEMO_NEWS)
   // Enrich with sentiment & related stocks if coming from API
   return raw.map(item => {
     if (item.relatedStocks?.length) return item
@@ -34,5 +34,5 @@ export async function getMarketNews(category = 'general'): Promise<NewsItem[]> {
 export async function getCompanyNews(symbol: string): Promise<NewsItem[]> {
   const from = new Date(Date.now() - 7 * 86400_000).toISOString().split('T')[0]
   const to = new Date().toISOString().split('T')[0]
-  return apiFetch<NewsItem[]>(`/company-news?symbol=${encodeURIComponent(symbol)}&from=${from}&to=${to}`, [])
+  return apiFetch<NewsItem[]>(`/company-news?symbol=${encodeURIComponent(symbol)}&from=${from}&to=${to}&translate=zh-Hant`, [])
 }
