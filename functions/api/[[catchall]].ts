@@ -61,8 +61,16 @@ async function getQuoteBundle(symbol: string, api: (path: string) => Promise<any
   const metric = metricRes.status === 'fulfilled' ? metricRes.value : {}
 
   const price = num(q.c || q.pc)
-  const week52High = metricValue(metric, ['52WeekHigh', '52WeekHighDate']) || Math.max(num(q.h), price)
-  const week52Low = metricValue(metric, ['52WeekLow', '52WeekLowDate']) || Math.min(num(q.l), price)
+  const quoteHigh = Math.max(num(q.h), price)
+  const quoteLow = Math.min(num(q.l) || price, price)
+  const metricHigh = metricValue(metric, ['52WeekHigh'])
+  const metricLow = metricValue(metric, ['52WeekLow'])
+  let week52High = metricHigh > 0 && (!price || metricHigh < price * 5) ? metricHigh : quoteHigh
+  let week52Low = metricLow > 0 && (!price || metricLow < price * 5) ? metricLow : quoteLow
+  if (week52Low > week52High) {
+    week52High = quoteHigh
+    week52Low = quoteLow
+  }
 
   return {
     symbol,
