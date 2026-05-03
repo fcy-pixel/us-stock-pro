@@ -21,13 +21,20 @@ export default function StocksPage() {
   const [sortBy, setSortBy] = useState<SortKey>('changePercent')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
 
+  // Only fetch live prices for top 30 by market cap (Finnhub free tier: 60 req/min)
+  const TOP30_SYMBOLS = DEMO_QUOTES
+    .slice()
+    .sort((a, b) => b.marketCap - a.marketCap)
+    .slice(0, 30)
+    .map(q => q.symbol)
+
   const { data: liveQuotes } = useQuery({
     queryKey: ['quotes', 'screener'],
-    queryFn: () => getQuotes(DEMO_QUOTES.map(q => q.symbol)),
+    queryFn: () => getQuotes(TOP30_SYMBOLS),
     refetchInterval: 30_000,
   })
 
-  // Always show all stocks from DEMO_QUOTES; overlay live price fields where available
+  // Always show ALL stocks from DEMO_QUOTES; overlay live prices where available
   const stockData = DEMO_QUOTES.map(demo => {
     const live = liveQuotes?.find(q => q.symbol === demo.symbol)
     if (!live || !live.price) return demo
