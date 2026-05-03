@@ -10,8 +10,8 @@ interface Env {
 
 const FINNHUB = 'https://finnhub.io/api/v1'
 
-async function finnhub(path: string, env: Env) {
-  const url = `${FINNHUB}${path}${path.includes('?') ? '&' : '?'}token=${env.FINNHUB_API_KEY}`
+async function finnhub(path: string, apiKey: string) {
+  const url = `${FINNHUB}${path}${path.includes('?') ? '&' : '?'}token=${apiKey}`
   const res = await fetch(url, { headers: { 'Accept': 'application/json' } })
   if (!res.ok) throw new Error(`Finnhub error ${res.status}`)
   return res.json()
@@ -40,6 +40,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     return cors({ error: 'FINNHUB_API_KEY not configured — using demo data' }, 503)
   }
 
+  const api = (path: string) => finnhub(path, env.FINNHUB_API_KEY)
+
   const url = new URL(request.url)
   const path = url.pathname.replace(/^\/api/, '')
   const sp = url.searchParams
@@ -48,7 +50,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     // ── News ──────────────────────────────────────────────────────────
     if (path === '/news') {
       const category = sp.get('category') ?? 'general'
-      const raw: any[] = await finnhub(`/news?category=${category}`)
+      const raw: any[] = await api(`/news?category=${category}`)
       const news = raw.slice(0, 20).map((n: any) => ({
         id: String(n.id),
         headline: n.headline,
@@ -71,7 +73,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       const from = sp.get('from')
       const to = sp.get('to')
       if (!symbol || !from || !to) return cors({ error: 'Missing params' }, 400)
-      const raw: any[] = await finnhub(`/company-news?symbol=${symbol}&from=${from}&to=${to}`)
+      const raw: any[] = await api(`/company-news?symbol=${symbol}&from=${from}&to=${to}`)
       return cors(raw.slice(0, 15).map((n: any) => ({
         id: String(n.id),
         headline: n.headline,
@@ -92,8 +94,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       const symbol = sp.get('symbol')
       if (!symbol) return cors({ error: 'Missing symbol' }, 400)
       const [q, profile] = await Promise.all([
-        finnhub(`/quote?symbol=${symbol}`),
-        finnhub(`/stock/profile2?symbol=${symbol}`),
+        api(`/quote?symbol=${symbol}`),
+        api(`/stock/profile2?symbol=${symbol}`),
       ])
       return cors({
         symbol,
@@ -123,8 +125,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       const results = await Promise.allSettled(
         symbols.map(async sym => {
           const [q, p] = await Promise.all([
-            finnhub(`/quote?symbol=${sym}`),
-            finnhub(`/stock/profile2?symbol=${sym}`),
+            api(`/quote?symbol=${sym}`),
+            api(`/stock/profile2?symbol=${sym}`),
           ])
           return {
             symbol: sym,
@@ -155,7 +157,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     if (path === '/indices') {
       const INDEX_SYMBOLS = ['SPY', 'QQQ', 'DIA', 'IWM', 'VIX']
       const INDEX_NAMES: Record<string, string> = { SPY: 'S&P 500', QQQ: 'NASDAQ 100', DIA: 'Dow Jones', IWM: 'Russell 2000', VIX: 'VIX' }
-      const results = await Promise.allSettled(INDEX_SYMBOLS.map(s => finnhub(`/quote?symbol=${s}`)))
+      const results = await Promise.allSettled(INDEX_SYMBOLS.map(s => api(`/quote?symbol=${s}`)))
       return cors(
         results.map((r, i) => {
           const sym = INDEX_SYMBOLS[i]
@@ -172,7 +174,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       const from = sp.get('from')
       const to = sp.get('to')
       if (!symbol || !from || !to) return cors({ error: 'Missing params' }, 400)
-      const raw: any = await finnhub(`/stock/candle?symbol=${symbol}&resolution=${resolution}&from=${from}&to=${to}`)
+      const raw: any = await api(`/stock/candle?symbol=${symbol}&resolution=${resolution}&from=${from}&to=${to}`)
       if (raw.s !== 'ok') return cors([], 200)
       const candles = (raw.t as number[]).map((t: number, i: number) => ({
         time: t * 1000,
@@ -189,7 +191,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     if (path === '/search') {
       const q = sp.get('q')
       if (!q) return cors([])
-      const raw: any = await finnhub(`/search?q=${encodeURIComponent(q)}`)
+      const raw: any = await api(`/search?q=${encodeURIComponent(q)}`)
       return cors((raw.result ?? []).slice(0, 10).map((r: any) => ({
         symbol: r.symbol,
         name: r.description,
