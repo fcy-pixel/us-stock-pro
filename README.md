@@ -50,16 +50,15 @@ The app works with **demo data by default** — no API key needed to try it out.
 
 ## Deploy to Cloudflare Pages
 
-### One-time setup
+### Step 1 — Create GitHub repo & push
 
-1. Push to GitHub:
-   ```bash
-   git init
-   git add .
-   git commit -m "feat: initial StockPro app"
-   git remote add origin https://github.com/YOUR_USERNAME/us-stock-pro.git
-   git push -u origin main
-   ```
+```bash
+# Create a new repo at https://github.com/new  (name: us-stock-pro, private or public)
+# Then, in this folder:
+cd ~/us-stock-pro
+git remote add origin https://github.com/YOUR_USERNAME/us-stock-pro.git
+git push -u origin main
+```
 
 2. In [Cloudflare Dashboard](https://dash.cloudflare.com):
    - Workers & Pages → Create → Pages → Connect to Git
