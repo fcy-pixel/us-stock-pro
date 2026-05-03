@@ -28,7 +28,10 @@ function cors(body: unknown, status = 200): Response {
   })
 }
 
-export const onRequest: PagesFunction<Env> = async ({ request, env, params }) => {
+export const onRequest: PagesFunction<Env> = async (context) => {
+  const { request, params } = context
+  const env: Env = (context.env ?? {}) as Env
+
   if (request.method === 'OPTIONS') {
     return new Response(null, { headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET' } })
   }
