@@ -4,7 +4,7 @@ import AIRecommendationCard from '../components/ai/AIRecommendationCard'
 import { PageLoader } from '../components/common/Loading'
 import { getQuotes } from '../services/stockService'
 import { getMarketNews } from '../services/newsService'
-import { generateRecommendations } from '../services/aiService'
+import { getAIRecommendations } from '../services/aiService'
 import { DEMO_QUOTES, DEMO_NEWS } from '../utils/demoData'
 
 export default function AIPicksPage() {
@@ -20,12 +20,21 @@ export default function AIPicksPage() {
     refetchInterval: 120_000,
   })
 
-  const allRecs = generateRecommendations(quotes ?? DEMO_QUOTES, news ?? DEMO_NEWS)
+  const quoteData = quotes ?? DEMO_QUOTES
+  const newsData = news ?? DEMO_NEWS
+  const { data: aiRecs, isLoading: loadingAI } = useQuery({
+    queryKey: ['ai-recommendations', quoteData.map(q => q.symbol).join(','), newsData.map(n => n.id).join(',')],
+    queryFn: () => getAIRecommendations(quoteData, newsData),
+    enabled: !isLoading,
+    refetchInterval: 120_000,
+  })
+
+  const allRecs = aiRecs ?? []
   const buyRecs = allRecs.filter(r => r.action === 'STRONG_BUY' || r.action === 'BUY')
   const holdRecs = allRecs.filter(r => r.action === 'HOLD')
   const sellRecs = allRecs.filter(r => r.action === 'SELL' || r.action === 'STRONG_SELL')
 
-  if (isLoading) return <PageLoader />
+  if (isLoading || loadingAI) return <PageLoader />
 
   return (
     <div className="space-y-8 animate-slide-up">
@@ -35,7 +44,7 @@ export default function AIPicksPage() {
             <Cpu size={24} className="text-accent-blue" /> AI 選股推薦
           </h1>
           <p className="text-sm text-gray-400 mt-1">
-            多因子 AI 評分：情緒分析 × 技術指標 × 價格動量 × 分析師共識
+            Qwen AI 多因子評分：情緒分析 × 技術指標 × 價格動量 × 分析師共識
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">

@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { Search, Bell, Menu, TrendingUp, TrendingDown, X } from 'lucide-react'
 import { useAppStore } from '../../store'
-import { searchStocks } from '../../services/stockService'
+import { getMarketIndices, getMarketStatus, searchStocks } from '../../services/stockService'
 import { formatPercent } from '../../utils/formatters'
 import { DEMO_INDICES } from '../../utils/demoData'
 
@@ -14,6 +15,17 @@ export default function Header() {
   const [searching, setSearching] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const dropRef = useRef<HTMLDivElement>(null)
+
+  const { data: indices } = useQuery({
+    queryKey: ['indices', 'header'],
+    queryFn: getMarketIndices,
+    refetchInterval: 60_000,
+  })
+  const { data: marketStatus } = useQuery({
+    queryKey: ['market-status'],
+    queryFn: getMarketStatus,
+    refetchInterval: 60_000,
+  })
 
   useEffect(() => {
     if (query.length < 1) { setResults([]); return }
@@ -42,7 +54,9 @@ export default function Header() {
     navigate(`/stocks/${symbol}`)
   }
 
-  const bullish = DEMO_INDICES[0].changePercent > 0
+  const tickerData = indices ?? DEMO_INDICES
+  const isOpen = marketStatus?.isOpen ?? false
+  const statusLabel = isOpen ? '市場開市中' : marketStatus?.holiday ? '美股休市' : '市場已收市'
 
   return (
     <header className="fixed top-0 right-0 left-0 lg:left-16 z-20 h-16 bg-bg-primary/90 backdrop-blur border-b border-white/5 flex items-center gap-4 px-4">
@@ -53,7 +67,7 @@ export default function Header() {
 
       {/* Market ticker strip */}
       <div className="hidden md:flex items-center gap-4 mr-auto">
-        {DEMO_INDICES.slice(0, 4).map(idx => (
+        {tickerData.slice(0, 4).map(idx => (
           <div key={idx.symbol} className="flex items-center gap-1.5 text-xs">
             <span className="text-gray-400">{idx.name}</span>
             <span className="font-mono font-medium text-white">{(idx.price ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
@@ -96,9 +110,9 @@ export default function Header() {
       </div>
 
       {/* Market status pill */}
-      <div className={`hidden sm:flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border ${bullish ? 'border-up/30 bg-up/10 text-up' : 'border-down/30 bg-down/10 text-down'}`}>
-        <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${bullish ? 'bg-up' : 'bg-down'}`} />
-        <span>市場開市中</span>
+      <div className={`hidden sm:flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border ${isOpen ? 'border-up/30 bg-up/10 text-up' : 'border-yellow-400/30 bg-yellow-400/10 text-yellow-400'}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${isOpen ? 'animate-pulse bg-up' : 'bg-yellow-400'}`} />
+        <span>{statusLabel}</span>
       </div>
 
       {/* Notifications */}

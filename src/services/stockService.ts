@@ -1,4 +1,4 @@
-import type { Quote, Candle, MarketIndex, AnalystRating, SectorPerformance } from '../types'
+import type { Quote, Candle, MarketIndex, AnalystRating, SectorPerformance, MarketStatus } from '../types'
 import { DEMO_QUOTES, DEMO_INDICES, DEMO_SECTORS, generateDemoCandles } from '../utils/demoData'
 
 const BASE = '/api'
@@ -24,6 +24,35 @@ export async function getQuotes(symbols: string[]): Promise<Quote[]> {
 
 export async function getMarketIndices(): Promise<MarketIndex[]> {
   return apiFetch<MarketIndex[]>('/indices', DEMO_INDICES)
+}
+
+function localUSMarketStatus(): MarketStatus {
+  const now = new Date()
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    weekday: 'short',
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: false,
+  }).formatToParts(now)
+  const weekday = parts.find(p => p.type === 'weekday')?.value ?? 'Sun'
+  const hour = Number(parts.find(p => p.type === 'hour')?.value ?? 0)
+  const minute = Number(parts.find(p => p.type === 'minute')?.value ?? 0)
+  const minutes = hour * 60 + minute
+  const isWeekday = !['Sat', 'Sun'].includes(weekday)
+  const isOpen = isWeekday && minutes >= 9 * 60 + 30 && minutes < 16 * 60
+
+  return {
+    isOpen,
+    session: isOpen ? 'regular' : 'closed',
+    timezone: 'America/New_York',
+    holiday: null,
+    t: Math.floor(now.getTime() / 1000),
+  }
+}
+
+export async function getMarketStatus(): Promise<MarketStatus> {
+  return apiFetch<MarketStatus>('/market-status', localUSMarketStatus())
 }
 
 export async function getCandles(symbol: string, resolution: string, from: number, to: number): Promise<Candle[]> {

@@ -5,10 +5,12 @@
 
 interface Env {
   FINNHUB_API_KEY: string
+  QWEN_API_KEY?: string
   // Optional: ALPHA_VANTAGE_KEY, NEWS_API_KEY
 }
 
 const FINNHUB = 'https://finnhub.io/api/v1'
+const QWEN = 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions'
 
 async function finnhub(path: string, apiKey: string) {
   const url = `${FINNHUB}${path}${path.includes('?') ? '&' : '?'}token=${apiKey}`
@@ -17,12 +19,82 @@ async function finnhub(path: string, apiKey: string) {
   return res.json()
 }
 
+async function qwen(messages: unknown[], apiKey: string) {
+  const res = await fetch(QWEN, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'qwen-plus',
+      messages,
+      temperature: 0.2,
+      response_format: { type: 'json_object' },
+    }),
+  })
+  if (!res.ok) throw new Error(`Qwen error ${res.status}`)
+  return res.json()
+}
+
+const num = (value: unknown, fallback = 0) => {
+  const n = typeof value === 'number' ? value : Number(value)
+  return Number.isFinite(n) ? n : fallback
+}
+
+function metricValue(metric: any, keys: string[]) {
+  for (const key of keys) {
+    const value = metric?.metric?.[key]
+    if (value !== undefined && value !== null) return num(value)
+  }
+  return 0
+}
+
+async function getQuoteBundle(symbol: string, api: (path: string) => Promise<any>) {
+  const [quoteRes, profileRes, metricRes] = await Promise.allSettled([
+    api(`/quote?symbol=${symbol}`),
+    api(`/stock/profile2?symbol=${symbol}`),
+    api(`/stock/metric?symbol=${symbol}&metric=all`),
+  ])
+  const q = quoteRes.status === 'fulfilled' ? quoteRes.value : {}
+  const profile = profileRes.status === 'fulfilled' ? profileRes.value : {}
+  const metric = metricRes.status === 'fulfilled' ? metricRes.value : {}
+
+  const price = num(q.c || q.pc)
+  const week52High = metricValue(metric, ['52WeekHigh', '52WeekHighDate']) || Math.max(num(q.h), price)
+  const week52Low = metricValue(metric, ['52WeekLow', '52WeekLowDate']) || Math.min(num(q.l), price)
+
+  return {
+    symbol,
+    name: profile.name ?? symbol,
+    price,
+    change: num(q.d),
+    changePercent: num(q.dp),
+    open: num(q.o),
+    high: num(q.h),
+    low: num(q.l),
+    prevClose: num(q.pc),
+    volume: metricValue(metric, ['10DayAverageTradingVolume']) * 1_000_000,
+    avgVolume: metricValue(metric, ['3MonthAverageTradingVolume', '10DayAverageTradingVolume']) * 1_000_000,
+    marketCap: num(profile.marketCapitalization) * 1_000_000,
+    pe: metricValue(metric, ['peBasicExclExtraTTM', 'peNormalizedAnnual', 'peTTM']),
+    eps: metricValue(metric, ['epsBasicExclExtraItemsTTM', 'epsNormalizedAnnual', 'epsTTM']),
+    week52High,
+    week52Low,
+    sector: profile.finnhubIndustry ?? 'Unknown',
+    industry: profile.finnhubIndustry ?? 'Unknown',
+    logo: profile.logo ?? undefined,
+  }
+}
+
 function cors(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
       'Cache-Control': 'public, max-age=30',
     },
   })
@@ -33,7 +105,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const env: Env = (context.env ?? {}) as Env
 
   if (request.method === 'OPTIONS') {
-    return new Response(null, { headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET' } })
+    return new Response(null, { headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,POST,OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' } })
   }
 
   if (!env.FINNHUB_API_KEY) {
@@ -47,6 +119,50 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const sp = url.searchParams
 
   try {
+    // ── Market status ─────────────────────────────────────────────────
+    if (path === '/market-status') {
+      const raw: any = await api('/stock/market-status?exchange=US')
+      return cors({
+        isOpen: !!raw.isOpen,
+        session: raw.session ?? (raw.isOpen ? 'regular' : 'closed'),
+        timezone: raw.timezone ?? 'America/New_York',
+        holiday: raw.holiday ?? null,
+        t: raw.t ?? null,
+      })
+    }
+
+    // ── Qwen AI recommendations ───────────────────────────────────────
+    if (path === '/ai-recommendations') {
+      if (request.method !== 'POST') return cors({ error: 'Method not allowed' }, 405)
+      if (!env.QWEN_API_KEY) return cors({ error: 'QWEN_API_KEY not configured' }, 503)
+
+      const body = await request.json().catch(() => ({})) as any
+      const quotes = Array.isArray(body.quotes) ? body.quotes.slice(0, 15) : []
+      const news = Array.isArray(body.news) ? body.news.slice(0, 12) : []
+      const payload = {
+        quotes: quotes.map((q: any) => ({
+          symbol: q.symbol,
+          name: q.name,
+          price: q.price,
+          changePercent: q.changePercent,
+          marketCap: q.marketCap,
+          pe: q.pe,
+          eps: q.eps,
+          week52High: q.week52High,
+          week52Low: q.week52Low,
+          sector: q.sector,
+        })),
+        news: news.map((n: any) => ({ headline: n.headline, summary: n.summary, sentiment: n.sentiment, relatedStocks: n.relatedStocks })),
+      }
+      const result = await qwen([
+        { role: 'system', content: '你是專業美股投資分析助手。只輸出 JSON，使用繁體中文。不要提供保證收益，不要假裝知道缺失資料。JSON 格式：{"recommendations":[{"symbol":"AAPL","action":"BUY","confidence":70,"targetPrice":190,"upside":8.5,"scores":{"sentiment":60,"technical":55,"momentum":70,"analyst":65},"reasons":["..."],"risk":"MEDIUM"}]}' },
+        { role: 'user', content: `根據以下行情與新聞，為每隻股票給出投資評級。action 只可用 STRONG_BUY, BUY, HOLD, SELL, STRONG_SELL；risk 只可用 LOW, MEDIUM, HIGH。資料：${JSON.stringify(payload)}` },
+      ], env.QWEN_API_KEY)
+      const content = result?.choices?.[0]?.message?.content ?? '{}'
+      const parsed = JSON.parse(content)
+      return cors(parsed)
+    }
+
     // ── News ──────────────────────────────────────────────────────────
     if (path === '/news') {
       const category = sp.get('category') ?? 'general'
@@ -93,62 +209,14 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     if (path === '/quote') {
       const symbol = sp.get('symbol')
       if (!symbol) return cors({ error: 'Missing symbol' }, 400)
-      const [q, profile] = await Promise.all([
-        api(`/quote?symbol=${symbol}`),
-        api(`/stock/profile2?symbol=${symbol}`),
-      ])
-      return cors({
-        symbol,
-        name: profile.name ?? symbol,
-        price: q.c ?? 0,
-        change: q.d ?? 0,
-        changePercent: q.dp ?? 0,
-        open: q.o ?? 0,
-        high: q.h ?? 0,
-        low: q.l ?? 0,
-        prevClose: q.pc ?? 0,
-        volume: 0,
-        avgVolume: 0,
-        marketCap: (profile.marketCapitalization ?? 0) * 1_000_000,
-        pe: profile.peNormalizedAnnual ?? 0,
-        eps: 0,
-        week52High: q['52WeekHigh'] ?? 0,
-        week52Low: q['52WeekLow'] ?? 0,
-        sector: profile.finnhubIndustry ?? 'Unknown',
-        industry: profile.finnhubIndustry ?? 'Unknown',
-      })
+      return cors(await getQuoteBundle(symbol, api))
     }
 
     // ── Multiple quotes ───────────────────────────────────────────────
     if (path === '/quotes') {
       const symbols = (sp.get('symbols') ?? '').split(',').filter(Boolean).slice(0, 30)
       const results = await Promise.allSettled(
-        symbols.map(async sym => {
-          const [q, p] = await Promise.all([
-            api(`/quote?symbol=${sym}`),
-            api(`/stock/profile2?symbol=${sym}`),
-          ])
-          return {
-            symbol: sym,
-            name: p.name ?? sym,
-            price: q.c ?? 0,
-            change: q.d ?? 0,
-            changePercent: q.dp ?? 0,
-            open: q.o ?? 0,
-            high: q.h ?? 0,
-            low: q.l ?? 0,
-            prevClose: q.pc ?? 0,
-            volume: 0,
-            avgVolume: 0,
-            marketCap: (p.marketCapitalization ?? 0) * 1_000_000,
-            pe: p.peNormalizedAnnual ?? 0,
-            eps: 0,
-            week52High: 0,
-            week52Low: 0,
-            sector: p.finnhubIndustry ?? 'Unknown',
-            industry: p.finnhubIndustry ?? 'Unknown',
-          }
-        })
+        symbols.map(sym => getQuoteBundle(sym, api))
       )
       return cors(results.filter(r => r.status === 'fulfilled').map((r: any) => r.value))
     }

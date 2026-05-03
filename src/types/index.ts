@@ -55,6 +55,14 @@ export interface MarketIndex {
   changePercent: number
 }
 
+export interface MarketStatus {
+  isOpen: boolean
+  session: string
+  timezone: string
+  holiday: string | null
+  t: number | null
+}
+
 export interface Recommendation {
   symbol: string
   name: string
