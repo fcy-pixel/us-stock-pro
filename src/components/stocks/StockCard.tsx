@@ -51,7 +51,7 @@ export default function StockCard({ quote }: { quote: Quote }) {
       <div className="mt-3 h-0.5 bg-white/5 rounded-full overflow-hidden">
         <div
           className={`h-full ${up ? 'bg-up' : 'bg-down'} rounded-full`}
-          style={{ width: `${Math.min(100, (quote.price - quote.week52Low) / (quote.week52High - quote.week52Low) * 100)}%` }}
+          style={{ width: (() => { const range = quote.week52High - quote.week52Low; return range > 0 ? `${Math.min(100, (quote.price - quote.week52Low) / range * 100)}%` : '50%' })() }}
         />
       </div>
       <div className="flex justify-between text-[10px] text-gray-600 mt-1">

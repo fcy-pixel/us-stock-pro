@@ -98,7 +98,7 @@ export default function Header() {
       {/* Market status pill */}
       <div className={`hidden sm:flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border ${bullish ? 'border-up/30 bg-up/10 text-up' : 'border-down/30 bg-down/10 text-down'}`}>
         <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${bullish ? 'bg-up' : 'bg-down'}`} />
-        <span>Market Open</span>
+        <span>市場開市中</span>
       </div>
 
       {/* Notifications */}
