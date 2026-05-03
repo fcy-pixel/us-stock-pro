@@ -273,11 +273,25 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       return cors(await getQuoteBundle(symbol, api))
     }
 
-    // ── Multiple quotes ───────────────────────────────────────────────
+    // ── Multiple quotes (slim: only /quote per symbol for screener list) ─
     if (path === '/quotes') {
       const symbols = (sp.get('symbols') ?? '').split(',').filter(Boolean).slice(0, 30)
+      // Only fetch the price quote (1 call per symbol = 15 calls total, not 45)
       const results = await Promise.allSettled(
-        symbols.map(sym => getQuoteBundle(sym, api))
+        symbols.map(async (sym) => {
+          const q: any = await api(`/quote?symbol=${sym}`)
+          const price = num(q.c || q.pc)
+          return {
+            symbol: sym,
+            price,
+            change: num(q.d),
+            changePercent: num(q.dp),
+            open: num(q.o),
+            high: num(q.h),
+            low: num(q.l),
+            prevClose: num(q.pc),
+          }
+        })
       )
       return cors(results.filter(r => r.status === 'fulfilled').map((r: any) => r.value))
     }

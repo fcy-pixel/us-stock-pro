@@ -21,13 +21,27 @@ export default function StocksPage() {
   const [sortBy, setSortBy] = useState<SortKey>('changePercent')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
 
-  const { data: quotes } = useQuery({
+  const { data: liveQuotes } = useQuery({
     queryKey: ['quotes', 'screener'],
     queryFn: () => getQuotes(DEMO_QUOTES.map(q => q.symbol)),
     refetchInterval: 30_000,
   })
 
-  const stockData = quotes ?? DEMO_QUOTES
+  // Always show all stocks from DEMO_QUOTES; overlay live price fields where available
+  const stockData = DEMO_QUOTES.map(demo => {
+    const live = liveQuotes?.find(q => q.symbol === demo.symbol)
+    if (!live || !live.price) return demo
+    return {
+      ...demo,
+      price: live.price,
+      change: live.change,
+      changePercent: live.changePercent,
+      open: live.open || demo.open,
+      high: live.high || demo.high,
+      low: live.low || demo.low,
+      prevClose: live.prevClose || demo.prevClose,
+    }
+  })
 
   // Detail view
   if (symbol) {
