@@ -1,0 +1,7 @@
+name = "us-stock-pro"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "dist"
+
+[vars]
+# Add your Finnhub API key in the Cloudflare Pages dashboard:
+# Settings → Environment variables → FINNHUB_API_KEY
